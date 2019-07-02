@@ -1,24 +1,25 @@
 <template>
   <div class="home">
-    <div class="homeWrapper" v-if="loaded">
+    <div class="homeWrapper">
       <div class="topPart">
         <h1 class="dadsName" v-on:click="secretInput()">dr. Jelle Bijl</h1>
         <div class="imageAndBio">
           <div class="biografia">
             <p class="TextoBiografia" :style="{height:laAltura, transition:'300ms ease-in'}">
-              {{biographyText}}
+              dr. J.P. Bijl is docent geschiedenis en filosofie in het voortgezet en hoger onderwijs.
+              Zijn geschiedenisstudie rondde hij af aan de Vrije Universiteit te Amsterdam (doctoraalexamen en promotieonderzoek) en zijn filosofiestudie aan de Erasmus Universiteit Rotterdam (bachelor) en aan de Universiteit Leiden (master).
             </p>
             <b class="botonMovil pointeando" v-on:click="showBiography()">...{{meerOrminder}}</b>
             <b class="botonIpad pointeando" v-on:click="showBiographyIpad()">...{{meerOrminder}}</b>
           </div>
-          <img :src="profilePic">
+          <img src="../assets/Fotos/ProfilePic.jpg">
         </div>
       </div>
-      <div class="mainPart" v-if="loaded">
+      <div class="mainPart">
         <div class="booksPart">
           <h2>boeken</h2>
           <div class="listOfBooks">
-            <div v-for="(libro, index) in dataLibros" :key="index" class="bookThumbnail">
+            <div v-for="(libro, index) in data.libros" :key="index" class="bookThumbnail">
               <div class="imageDiv">
                 <img :src="libro.foto" alt>
 
@@ -50,18 +51,15 @@
         </div>
       </div>
     </div>
-    <div class="divLoader" v-if="!loaded">
-      <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-    </div>
   </div>
 </template>
 
 <script>
-import { db } from "../main.js";
+import dataLibros from "../assets/database/data.json";
 export default {
   data() {
     return {
-      dataLibros: new Object(),
+      data: new Object(),
       email: "",
       text: "",
       dialog: false,
@@ -70,15 +68,11 @@ export default {
       meerOrminder: "meer",
       secretCounter: 0,
       laAlturaTexto1: "12rem",
-      textCounter1: 0,
-      biographyText: null,
-      profilePic: null,
-      loaded: false,
+      textCounter1: 0
     };
   },
   mounted() {
-    this.retrieveBio();
-        this.retrieveDataBooks();
+    this.data = dataLibros;
   },
   methods: {
     showBiography() {
@@ -144,7 +138,7 @@ export default {
     secretInput() {
       console.log(this.secretCounter);
       if (this.secretCounter >= 10) {
-        this.$router.push("/introduccion");
+        this.$router.push("/introduccion")
       } else {
         this.secretCounter++;
       }
@@ -154,34 +148,6 @@ export default {
       setTimeout(() => {
         this.secretCounter = 0;
       }, 5000);
-    },
-    retrieveDataBooks() {
-      let retrievingData = db
-      .collection("libros")
-      .get()
-      .then(snapshot =>{
-        let dataArray = new Object();
-        snapshot.forEach(doc => {
-          dataArray[doc.data().titulo] = doc.data();
-        });
-        this.dataLibros = dataArray;
-        this.loaded = true;
-
-      })
-    },
-    retrieveBio() {
-      let retrievingData = db
-      .collection("autor")
-      .get()
-      .then(snapshot =>{
-        snapshot.forEach(doc => {
-          console.log(doc.data());
-          this.biographyText = doc.data().texto;
-          this.profilePic = doc.data().foto;
-        });
-        this.$store.commit("setBiography", this.biographyText);
-
-      })
     }
   },
   components: {}
@@ -204,10 +170,6 @@ export default {
 
 .bookInfo h4 {
   margin-bottom: 0.5rem;
-}
-
-.home{
-  min-height: 100vh;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 568px) {
   .home {
@@ -816,99 +778,4 @@ export default {
     display: none;
   }
 }
-
-/* L O A D E R*/
-
-.divLoader{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.lds-roller {
-  display: inline-block;
-  position: relative;
-  width: 64px;
-  height: 64px;
-}
-.lds-roller div {
-  animation: lds-roller 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  transform-origin: 32px 32px;
-}
-.lds-roller div:after {
-  content: " ";
-  display: block;
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgb(58, 58, 58);
-  margin: -3px 0 0 -3px;
-}
-.lds-roller div:nth-child(1) {
-  animation-delay: -0.036s;
-}
-.lds-roller div:nth-child(1):after {
-  top: 50px;
-  left: 50px;
-}
-.lds-roller div:nth-child(2) {
-  animation-delay: -0.072s;
-}
-.lds-roller div:nth-child(2):after {
-  top: 54px;
-  left: 45px;
-}
-.lds-roller div:nth-child(3) {
-  animation-delay: -0.108s;
-}
-.lds-roller div:nth-child(3):after {
-  top: 57px;
-  left: 39px;
-}
-.lds-roller div:nth-child(4) {
-  animation-delay: -0.144s;
-}
-.lds-roller div:nth-child(4):after {
-  top: 58px;
-  left: 32px;
-}
-.lds-roller div:nth-child(5) {
-  animation-delay: -0.18s;
-}
-.lds-roller div:nth-child(5):after {
-  top: 57px;
-  left: 25px;
-}
-.lds-roller div:nth-child(6) {
-  animation-delay: -0.216s;
-}
-.lds-roller div:nth-child(6):after {
-  top: 54px;
-  left: 19px;
-}
-.lds-roller div:nth-child(7) {
-  animation-delay: -0.252s;
-}
-.lds-roller div:nth-child(7):after {
-  top: 50px;
-  left: 14px;
-}
-.lds-roller div:nth-child(8) {
-  animation-delay: -0.288s;
-}
-.lds-roller div:nth-child(8):after {
-  top: 45px;
-  left: 10px;
-}
-@keyframes lds-roller {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 </style>
