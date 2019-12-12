@@ -5,13 +5,14 @@
         <h1 class="dadsName" v-on:click="secretInput()">dr. Jelle Bijl</h1>
         <div class="imageAndBio">
           <div class="biografia">
-            <p class="TextoBiografia" :style="{height:laAltura, transition:'300ms ease-in'}">
-              {{biographyText}}
-            </p>
+            <p
+              class="TextoBiografia"
+              :style="{height:laAltura, transition:'300ms ease-in'}"
+            >{{biographyText}}</p>
             <b class="botonMovil pointeando" v-on:click="showBiography()">...{{meerOrminder}}</b>
             <b class="botonIpad pointeando" v-on:click="showBiographyIpad()">...{{meerOrminder}}</b>
           </div>
-          <img :src="profilePic">
+          <img :src="profilePic" />
         </div>
       </div>
       <div class="mainPart" v-if="loaded">
@@ -20,7 +21,7 @@
           <div class="listOfBooks">
             <div v-for="(libro, index) in dataLibros" :key="index" class="bookThumbnail">
               <div class="imageDiv">
-                <img :src="libro.foto" alt>
+                <img :src="libro.foto" alt />
 
                 <a class="botonCompraCustom" target="_blank" :href="`${libro.direccionCompra}`">
                   <p class="botonbestellen">bestellen</p>
@@ -43,7 +44,7 @@
       </div>
       <div class="contactFormal">
         <h2>contacteer mij:</h2>
-        <input type="text" placeholder="Email" v-model="email">
+        <input type="text" placeholder="Email" v-model="email" />
         <textarea placeholder="Typ een bericht..." name="comment" id cols="30" v-model="text"></textarea>
         <div class="botonEnviarComentario">
           <p v-on:click="verifyEmail()" class="pointeando">Verzenden</p>
@@ -51,13 +52,23 @@
       </div>
     </div>
     <div class="divLoader" v-if="!loaded">
-      <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div class="lds-roller">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { db } from "../main.js";
+import axios from "axios";
 export default {
   data() {
     return {
@@ -73,12 +84,13 @@ export default {
       textCounter1: 0,
       biographyText: null,
       profilePic: null,
-      loaded: false,
+      loaded: false
     };
   },
   mounted() {
     this.retrieveBio();
-        this.retrieveDataBooks();
+    this.retrieveDataBooks();
+    this.retrievePdf();
   },
   methods: {
     showBiography() {
@@ -116,21 +128,20 @@ export default {
       }
     },
     sendEmail() {
-      Email.send({
-        Host: "smtp.elasticemail.com",
-        Username: "tangerincoder@gmail.com",
-        Password: "e47f2ec7-db29-4bfe-b9d6-402bea7ddb13",
-        To: "rodrigopple@gmail.com", //here goes mattsFahter email
-        From: "tangerincoder@gmail.com",
-        Subject: `Message from ${this.email}`,
-        Body: this.text
-      })
-        .then(
-          (this.text = ""),
-          (this.email = ""),
-          alert("Your message has been sent!")
-        )
-        .catch(err => alert(err));
+      let email_object = {
+        user_email: this.email,
+        user_subject: "Your message mr. Bijl ",
+        text: this.text,
+        dest_email: "jpbijl1206@gmail.com"
+      };
+      axios
+        .post("https://mymailingtool.herokuapp.com/", email_object)
+        .then(res => {
+          if (res.data == "Ok") alert("Message Sent");
+          else alert("Email not operative currently");
+        });
+      this.text = "";
+      this.email = "";
     },
     showTextBook(event) {
       if (event.counter % 2 == 0) {
@@ -157,31 +168,34 @@ export default {
     },
     retrieveDataBooks() {
       let retrievingData = db
-      .collection("libros")
-      .get()
-      .then(snapshot =>{
-        let dataArray = new Object();
-        snapshot.forEach(doc => {
-          dataArray[doc.data().titulo] = doc.data();
+        .collection("libros")
+        .get()
+        .then(snapshot => {
+          let i = 4;
+          let dataArray = new Object();
+          snapshot.forEach(doc => {
+            dataArray[i--] = doc.data();
+          });
+          this.dataLibros = dataArray;
+          this.loaded = true;
         });
-        this.dataLibros = dataArray;
-        this.loaded = true;
-
-      })
     },
     retrieveBio() {
       let retrievingData = db
-      .collection("autor")
-      .get()
-      .then(snapshot =>{
-        snapshot.forEach(doc => {
-          console.log(doc.data());
-          this.biographyText = doc.data().texto;
-          this.profilePic = doc.data().foto;
+        .collection("autor")
+        .get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            //console.log(doc.data());
+            this.biographyText = doc.data().texto;
+            this.profilePic = doc.data().foto;
+          });
+          this.$store.commit("setBiography", this.biographyText);
         });
-        this.$store.commit("setBiography", this.biographyText);
-
-      })
+    },
+    retrievePdf() {
+      var storage = firebase.storage();
+var pathReference = storage.ref('images/stars.jpg');
     }
   },
   components: {}
@@ -206,7 +220,7 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.home{
+.home {
   min-height: 100vh;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 568px) {
@@ -819,7 +833,7 @@ export default {
 
 /* L O A D E R*/
 
-.divLoader{
+.divLoader {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -910,5 +924,4 @@ export default {
     transform: rotate(360deg);
   }
 }
-
 </style>
