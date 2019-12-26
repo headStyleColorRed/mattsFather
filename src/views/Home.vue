@@ -72,7 +72,7 @@ import axios from "axios";
 export default {
   data() {
     return {
-      dataLibros: new Object(),
+      dataLibros: new Array(),
       email: "",
       text: "",
       dialog: false,
@@ -176,7 +176,13 @@ export default {
           snapshot.forEach(doc => {
             dataArray[i--] = doc.data();
           });
-          this.dataLibros = dataArray;
+
+          let libros_array = new Array();
+          libros_array.push(dataArray[1]);
+          libros_array.push(dataArray[3]);
+          libros_array.push(dataArray[4]);
+          libros_array.push(dataArray[2]);
+          this.dataLibros = libros_array;
           this.loaded = true;
         });
     },
@@ -194,8 +200,8 @@ export default {
         });
     },
     retrievePdf() {
-      var storage = firebase.storage();
-var pathReference = storage.ref('images/stars.jpg');
+      //var storage = firebase.storage();
+      //var pathReference = storage.ref("images/stars.jpg");
     }
   },
   components: {}
